@@ -27,30 +27,50 @@ function App() {
         const task = await todoContract.methods
           .getWork(i)
           .call({ from: (await web3.eth.getAccounts())[0] });
+        if (task[i]!== ''){ 
         tasks.push(task);
+        }
       } catch (error) {
         console.error(error);
       }
+      
     }
     setTasks(tasks);
     setLoading(false);
   }, [taskCount, todoContract, web3.eth]);
 
-  const loadTaskCount = useCallback(async () => {
-    const count = await todoContract.methods
-      .geWorkCount()
-      .call({ from: (await web3.eth.getAccounts())[0] });
-    setTaskCount(count);
-  }, [todoContract, web3.eth]);
+  // const loadTaskCount = useCallback(async () => {
+  //   try{
+  //   const count = await todoContract.methods
+  //     .geWorkCount()
+  //     .call({ from: (await web3.eth.getAccounts())[0] });
+  //   setTaskCount(count)}
+  //   catch (error) {
+  //     console.error(error);
+  //   }
+  // }, [todoContract, web3.eth]);
 
-  useEffect(() => {
-    if (window.ethereum) {
+  const loadTaskCount = useCallback(async () => {
+  try {
+    const accounts = await web3.eth.getAccounts();
+    const count = await todoContract.methods.geWorkCount().call({ from: accounts[0] });
+    setTaskCount(count);
+  } catch (error) {
+    console.error(error);
+    // optionally, you can set the task count to a default value or null if an error occurs
+  }
+}, [setTaskCount, todoContract, web3.eth]);
+
+const connectWallet =  (() => {
+    if (typeof window.ethereum !== 'undefined') {
       window.ethereum
         .request({ method: "eth_requestAccounts" })
         .then(() => setConnected(true))
         .catch((error) => console.log(error));
-    }
-  }, []);
+    }else {
+    console.error('MetaMask not detected. Please install MetaMask and try again.');
+  }
+  });
 
   useEffect(() => {
     if (connected) {
@@ -60,6 +80,7 @@ function App() {
 
   useEffect(() => {
     if (connected) {
+      
       loadTasks();
     }
   }, [taskCount, connected]);
@@ -67,6 +88,7 @@ function App() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
+    if(connected){
     try {
       await todoContract.methods
         .createWork(inputValue)
@@ -76,8 +98,12 @@ function App() {
     } catch (error) {
       console.error(error);
     }
-    console.log("clock");
+    console.log("clicked");
     setLoading(false);
+  }else{
+    alert("you need to connect to metamask on the goerli testnet first")
+    setLoading(false);
+  }
   };
 
   const handleDelete = async (index) => {
@@ -87,6 +113,7 @@ function App() {
       .send({ from: (await web3.eth.getAccounts())[0] });
       
     await loadTaskCount();
+    await loadTasks();
     setLoading(false);
   };
 
@@ -106,11 +133,13 @@ function App() {
           {!connected ? (
             <button
               className="title-btn"
-              onClick={() =>
-                window.ethereum
-                  .request({ method: "eth_requestAccounts" })
-                  .then(() => setConnected(true))
-              }>
+              onClick={connectWallet}
+              // onClick={() =>
+              //   window.ethereum
+              //     .request({ method: "eth_requestAccounts" })
+              //     .then(() => setConnected(true))
+              // }
+              >
               Connect wallet
             </button>
           ) : (
@@ -118,13 +147,13 @@ function App() {
           )}
         </div>
         <h3 className="">
-          Get more done wit TaskMesh. Manage, capture, and set goals from
+          Get more done with TaskMesh. Manage, capture, and set goals from
           anywhere, at any time. you have complete control over your data and
           don't need a third-party service to manage it. With TaskMesh, you
           don't need to worry about your data being sold or used for other
           purposes without your consent.
         </h3>
-        <h3 className="task" id="taskCount">
+        <h3 className="task" >
           You currently have {taskCount} tasks
         </h3>
       </div>
