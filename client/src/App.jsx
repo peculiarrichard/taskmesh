@@ -27,9 +27,7 @@ function App() {
         const task = await todoContract.methods
           .getWork(i)
           .call({ from: (await web3.eth.getAccounts())[0] });
-        if (task[i]!== ''){ 
         tasks.push(task);
-        }
       } catch (error) {
         console.error(error);
       }
@@ -38,17 +36,6 @@ function App() {
     setTasks(tasks);
     setLoading(false);
   }, [taskCount, todoContract, web3.eth]);
-
-  // const loadTaskCount = useCallback(async () => {
-  //   try{
-  //   const count = await todoContract.methods
-  //     .geWorkCount()
-  //     .call({ from: (await web3.eth.getAccounts())[0] });
-  //   setTaskCount(count)}
-  //   catch (error) {
-  //     console.error(error);
-  //   }
-  // }, [todoContract, web3.eth]);
 
   const loadTaskCount = useCallback(async () => {
   try {
@@ -82,8 +69,9 @@ const connectWallet =  (() => {
     if (connected) {
       
       loadTasks();
+      setLoading(false)
     }
-  }, [taskCount, connected]);
+  }, [taskCount, connected, loadTasks]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -154,7 +142,7 @@ const connectWallet =  (() => {
           purposes without your consent.
         </h3>
         <h3 className="task" >
-          You currently have {taskCount} tasks
+          Your record: So far, you have created {taskCount} tasks
         </h3>
       </div>
       <div className="">

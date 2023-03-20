@@ -44,8 +44,8 @@
 require('dotenv').config();
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-MNEMONIC = process.env.MNEMONIC
-PROJECT_ID = process.env.PROJECT_ID
+MNEMONIC = "dinner focus message leopard spawn return robot learn tilt physical wrestle ten"
+PROJECT_ID = "https://goerli.infura.io/v3/b4e44a4415dd4269bdf77ed2208b23b2"
 
 module.exports = {
   /**
